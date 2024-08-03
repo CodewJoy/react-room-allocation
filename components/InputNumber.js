@@ -8,8 +8,8 @@ const StyledContainer = styled.div`
 `;
 
 const StyledInput = styled.input`
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   font-size: 16px;
   text-align: center;
   margin: 0 8px;
@@ -34,8 +34,8 @@ const StyledInput = styled.input`
 `;
 
 const StyledButton = styled.button`
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   font-size: 35px;
   display: flex;
   align-items: center;

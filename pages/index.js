@@ -13,7 +13,7 @@ const StyledContainer = styled.div`
 `;
 
 const StyledButton = styled.button`
-  font-size: 16px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,7 +67,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
-        <h1>Room Allocation</h1>
+        <h2>Room Allocation</h2>
         <StyledContainer>
           {testCases.map((el, i) => (
             <StyledButton

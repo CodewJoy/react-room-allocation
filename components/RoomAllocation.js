@@ -79,6 +79,14 @@ export default function RoomAllocation({ guest, rooms }) {
   const unAssignedAdult = guest.adult - assignedAdult;
   const unAssignedChild = guest.child - assignedChild;
 
+  useEffect(() => {
+    const defaultRooms = getDefaultRoomAllocation({
+      guest,
+      rooms,
+    }).defaultRooms;
+    setAllocations(defaultRooms);
+  }, [JSON.stringify(guest), JSON.stringify(rooms)]);
+
   const handleAllocationChange = (index, type, value) => {
     const newAllocations = cloneDeep(stateAllocations);
     newAllocations[index][type] = value;
@@ -107,40 +115,41 @@ export default function RoomAllocation({ guest, rooms }) {
       <StyledWarning>
         尚未分配人數: {unAssignedAdult}位大人，{unAssignedChild}位小孩
       </StyledWarning>
-      {stateAllocations.map((el, index) => {
-        return (
-          <StyledRoomContainer key={index}>
-            房間: {el.adult + el.child} 人， 價格: {el.price}
-            <StyledSelection>
-              {" "}
-              <StyledAdultTest>
-                大人<p className="description">年齡 20+</p>
-              </StyledAdultTest>
-              <InputNumber
-                value={el.adult}
-                min={0}
-                max={rooms[index].capacity - el.child}
-                onChange={(e) =>
-                  handleAllocationChange(index, "adult", e.target.value)
-                }
-              />
-            </StyledSelection>
-            <StyledSelection>
-              {" "}
-              小孩
-              <InputNumber
-                value={el.child}
-                min={0}
-                max={rooms[index].capacity - el.adult}
-                onChange={(e) =>
-                  handleAllocationChange(index, "child", e.target.value)
-                }
-              />
-            </StyledSelection>
-            <StyledLine />
-          </StyledRoomContainer>
-        );
-      })}
+      {stateAllocations.length &&
+        stateAllocations.map((el, index) => {
+          return (
+            <StyledRoomContainer key={index}>
+              房間: {el.adult + el.child} 人， 價格: {el.price}
+              <StyledSelection>
+                {" "}
+                <StyledAdultTest>
+                  大人<p className="description">年齡 20+</p>
+                </StyledAdultTest>
+                <InputNumber
+                  value={el.adult}
+                  min={0}
+                  max={rooms[index] ? rooms[index].capacity - el.child : 0}
+                  onChange={(e) =>
+                    handleAllocationChange(index, "adult", e.target.value)
+                  }
+                />
+              </StyledSelection>
+              <StyledSelection>
+                {" "}
+                小孩
+                <InputNumber
+                  value={el.child}
+                  min={0}
+                  max={rooms[index] ? rooms[index].capacity - el.adult : 0}
+                  onChange={(e) =>
+                    handleAllocationChange(index, "child", e.target.value)
+                  }
+                />
+              </StyledSelection>
+              <StyledLine />
+            </StyledRoomContainer>
+          );
+        })}
       <StyledTotoalPrice>總價格: {totalPrice}</StyledTotoalPrice>
     </StyledContainer>
   );
