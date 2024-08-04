@@ -110,10 +110,10 @@ export default function RoomAllocation({ guest, rooms }) {
   return (
     <StyledContainer>
       <StyledTitile>
-        住客人數: {guest.adult}位大人，{guest.child}位小孩 / {rooms.length}房
+        住客人數: {guest.adult} 位大人，{guest.child} 位小孩 / {rooms.length} 房
       </StyledTitile>
       <StyledWarning>
-        尚未分配人數: {unAssignedAdult}位大人，{unAssignedChild}位小孩
+        尚未分配人數: {unAssignedAdult} 位大人，{unAssignedChild} 位小孩
       </StyledWarning>
       {stateAllocations.length &&
         stateAllocations.map((el, index) => {
