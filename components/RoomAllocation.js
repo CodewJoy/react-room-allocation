@@ -119,7 +119,8 @@ export default function RoomAllocation({ guest, rooms }) {
         stateAllocations.map((el, index) => {
           return (
             <StyledRoomContainer key={index}>
-              房間: {el.adult + el.child} 人， 價格: {el.price}
+              房間: {el.adult + el.child} 人，可容納人數:{" "}
+              {rooms[index]?.capacity || ""}，價格: {el.price}
               <StyledSelection>
                 {" "}
                 <StyledAdultTest>
@@ -127,11 +128,11 @@ export default function RoomAllocation({ guest, rooms }) {
                 </StyledAdultTest>
                 <InputNumber
                   value={el.adult}
-                  min={0}
+                  min={el.adult && el.child ? 1 : 0} // NOTICE: 有 child 的 room 至少要有一個 adult 分配在同一間 room
                   max={rooms[index] ? rooms[index].capacity - el.child : 0}
-                  onChange={(e) =>
-                    handleAllocationChange(index, "adult", e.target.value)
-                  }
+                  onChange={(e) => {
+                    handleAllocationChange(index, "adult", e.target.value);
+                  }}
                 />
               </StyledSelection>
               <StyledSelection>
@@ -141,9 +142,11 @@ export default function RoomAllocation({ guest, rooms }) {
                   value={el.child}
                   min={0}
                   max={rooms[index] ? rooms[index].capacity - el.adult : 0}
-                  onChange={(e) =>
-                    handleAllocationChange(index, "child", e.target.value)
-                  }
+                  onChange={(e) => {
+                    // NOTICE: 有 child 的 room 至少要有一個 adult 分配在同一間 room
+                    if (el.adult >= 1)
+                      handleAllocationChange(index, "child", e.target.value);
+                  }}
                 />
               </StyledSelection>
               <StyledLine />

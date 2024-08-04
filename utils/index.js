@@ -2,15 +2,25 @@ export const getDefaultRoomAllocation = ({ guest, rooms }) => {
   const { adult: totalAdults, child: totalChildren } = guest;
   const n = rooms.length;
 
-  // dp[a][c][i] 表示分配了 a 个成人和 c 个孩子到前 i 个房间的最小费用
+  // dp[a][c][i] represents the minimum cost to allocate 'a' adults and 'c' children to the first 'i' rooms
   const dp = Array(totalAdults + 1)
+    .fill()
+    .map(() =>
+      Array(totalChildren + 1)
+        .fill()
+        .map(() => Array(n + 1).fill(Infinity))
+    );
+
+  // memo to store allocations
+  const memo = Array(totalAdults + 1)
     .fill(null)
     .map(() =>
       Array(totalChildren + 1)
         .fill(null)
-        .map(() => Array(n + 1).fill(Infinity))
+        .map(() => Array(n + 1).fill(null))
     );
 
+  // Initialize the starting point with 0 cost
   dp[0][0][0] = 0;
 
   for (let i = 0; i < n; i++) {
@@ -34,53 +44,49 @@ export const getDefaultRoomAllocation = ({ guest, rooms }) => {
                 room.roomPrice +
                 na * room.adultPrice +
                 nc * room.childPrice;
-              dp[a + na][c + nc][i + 1] = Math.min(
-                dp[a + na][c + nc][i + 1],
-                newPrice
-              );
+              // dp[a][c][i] represents the minimum cost of allocating a adults and c children to the first i rooms.
+              if (newPrice < dp[a + na][c + nc][i + 1]) {
+                dp[a + na][c + nc][i + 1] = newPrice;
+                memo[a + na][c + nc][i + 1] = { na, nc, roomIndex: i };
+              }
             }
           }
         }
       }
     }
   }
-  // console.log("dp", dp);
+
   const result = [];
   let totalPrice = dp[totalAdults][totalChildren][n];
+
+  // If no valid allocation found
   if (totalPrice === Infinity) {
     return {
-      defaultRooms: rooms.map((el) => ({ adult: 0, child: 0, price: 0 })),
+      defaultRooms: rooms.map(() => ({ adult: 0, child: 0, price: 0 })),
       totalPrice: 0,
     };
   }
 
+  // Trace back the solution to find the allocation
   let a = totalAdults;
   let c = totalChildren;
-  for (let i = n - 1; i >= 0; i--) {
-    const room = rooms[i];
-    let found = false;
-    for (let na = 0; na <= Math.min(room.capacity, a); na++) {
-      for (let nc = 0; nc <= Math.min(room.capacity - na, c); nc++) {
-        if (nc > 0 && na === 0) continue; // skip invalid cases where children are alone
-        const newPrice =
-          dp[a][c][i + 1] -
-          (room.roomPrice + na * room.adultPrice + nc * room.childPrice);
-        if (newPrice === dp[a - na][c - nc][i]) {
-          result.push({
-            adult: na,
-            child: nc,
-            price: room.roomPrice + na * room.adultPrice + nc * room.childPrice,
-          });
-          a -= na;
-          c -= nc;
-          found = true;
-          break;
-        }
-      }
-      if (found) break;
+  for (let i = n; i > 0; i--) {
+    const allocation = memo[a][c][i];
+    if (allocation) {
+      const { na, nc, roomIndex } = allocation;
+      result.push({
+        adult: na,
+        child: nc,
+        price:
+          rooms[roomIndex].roomPrice +
+          na * rooms[roomIndex].adultPrice +
+          nc * rooms[roomIndex].childPrice,
+      });
+      a -= na;
+      c -= nc;
     }
   }
-  // console.log(result.reverse(), totalPrice);
+
   return { defaultRooms: result.reverse(), totalPrice };
 };
 
