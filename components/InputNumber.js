@@ -62,37 +62,42 @@ export default function InputNumber({
   onChange,
   onBlur,
 }) {
+  const refValue = useRef(value);
   const refInterval = useRef(null);
+
   const handleChange = (e) => {
     const newValue = Number(e.target.value);
     if (!isNaN(newValue) && newValue >= min && newValue <= max) {
+      refValue.current = newValue;
       onChange({ target: { name, value: newValue } });
     }
   };
 
   const handleBlur = (e) => {
-    if (onBlur) onBlur({ target: { name, value: value } });
+    if (onBlur) onBlur({ target: { name, value: refValue.current } });
   };
 
   const handleIncrement = () => {
     if (disabled) return;
-    if (value < max) {
-      const newValue = Math.min(value + step, max);
+    if (refValue.current < max) {
+      const newValue = Math.min(refValue.current + step, max);
+      refValue.current = newValue; // NOTICE: avoid closure when long press
       onChange({ target: { name, value: newValue } });
     }
   };
 
   const handleDecrement = () => {
     if (disabled) return;
-    if (value > min) {
-      const newValue = Math.max(value - step, min);
+    if (refValue.current > min) {
+      const newValue = Math.max(refValue.current - step, min);
+      refValue.current = newValue; // NOTICE: avoid closure when long press
       onChange({ target: { name, value: newValue } });
     }
   };
 
   const handleMouseDown = (action) => {
     action();
-    refInterval.current = setInterval(action, 100);
+    refInterval.current = setInterval(action, 200);
   };
 
   const handleMouseUp = () => {

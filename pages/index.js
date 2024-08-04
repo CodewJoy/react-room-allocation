@@ -23,6 +23,10 @@ const StyledButton = styled.button`
   color: rgb(30, 159, 210);
   background-color: white;
   border: 1px solid rgb(30, 159, 210);
+  ${({ $focus }) =>
+    $focus &&
+    `color: white;
+  background-color: rgb(30, 159, 210);`}
 `;
 
 const testCases = [
@@ -57,7 +61,7 @@ const testCases = [
 ];
 
 export default function Home() {
-  const [testCase, setTestCase] = useState(testCases[0]);
+  const [stateTestCase, setTestCase] = useState(testCases[0]);
   return (
     <>
       <Head>
@@ -72,13 +76,17 @@ export default function Home() {
           {testCases.map((el, i) => (
             <StyledButton
               key={el.name}
+              $focus={stateTestCase.name === el.name}
               onClick={() => setTestCase(testCases[i])}
             >
               {el.name}
             </StyledButton>
           ))}
         </StyledContainer>
-        <RoomAllocation guest={testCase.guest} rooms={testCase.rooms} />
+        <RoomAllocation
+          guest={stateTestCase.guest}
+          rooms={stateTestCase.rooms}
+        />
       </main>
     </>
   );
