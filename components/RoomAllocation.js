@@ -128,7 +128,8 @@ export default function RoomAllocation({ guest, rooms }) {
                 </StyledAdultTest>
                 <InputNumber
                   value={el.adult}
-                  min={el.adult && el.child ? 1 : 0} // NOTICE: 有 child 的 room 至少要有一個 adult 分配在同一間 room
+                  // NOTICE: 有 child 的 room 至少要有一個 adult 分配在同一間 room
+                  min={el.adult && el.child ? 1 : 0}
                   max={rooms[index] ? rooms[index].capacity - el.child : 0}
                   onChange={(e) => {
                     handleAllocationChange(index, "adult", e.target.value);
@@ -141,11 +142,14 @@ export default function RoomAllocation({ guest, rooms }) {
                 <InputNumber
                   value={el.child}
                   min={0}
-                  max={rooms[index] ? rooms[index].capacity - el.adult : 0}
+                  // NOTICE: 有 child 的 room 至少要有一個 adult 分配在同一間 room
+                  max={
+                    rooms[index] && el.adult >= 1
+                      ? rooms[index].capacity - el.adult
+                      : 0
+                  }
                   onChange={(e) => {
-                    // NOTICE: 有 child 的 room 至少要有一個 adult 分配在同一間 room
-                    if (el.adult >= 1)
-                      handleAllocationChange(index, "child", e.target.value);
+                    handleAllocationChange(index, "child", e.target.value);
                   }}
                 />
               </StyledSelection>

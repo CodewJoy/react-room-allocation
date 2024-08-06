@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "@emotion/styled";
 
 const StyledContainer = styled.div`
@@ -62,37 +62,29 @@ export default function InputNumber({
   onChange,
   onBlur,
 }) {
-  const refValue = useRef(value);
   const refInterval = useRef(null);
 
   const handleChange = (e) => {
     const newValue = Number(e.target.value);
     if (!isNaN(newValue) && newValue >= min && newValue <= max) {
-      refValue.current = newValue;
       onChange({ target: { name, value: newValue } });
     }
   };
 
   const handleBlur = (e) => {
-    if (onBlur) onBlur({ target: { name, value: refValue.current } });
+    if (onBlur) onBlur({ target: { name, value: value } });
   };
 
   const handleIncrement = () => {
-    if (disabled) return;
-    if (refValue.current < max) {
-      const newValue = Math.min(refValue.current + step, max);
-      refValue.current = newValue; // NOTICE: avoid closure when long press
-      onChange({ target: { name, value: newValue } });
-    }
+    if (disabled || value >= max) return;
+    const newValue = Math.min(value + step, max);
+    onChange({ target: { name, value: newValue } });
   };
 
   const handleDecrement = () => {
-    if (disabled) return;
-    if (refValue.current > min) {
-      const newValue = Math.max(refValue.current - step, min);
-      refValue.current = newValue; // NOTICE: avoid closure when long press
-      onChange({ target: { name, value: newValue } });
-    }
+    if (disabled || value <= min) return;
+    const newValue = Math.max(value - step, min);
+    onChange({ target: { name, value: newValue } });
   };
 
   const handleMouseDown = (action) => {
@@ -103,6 +95,10 @@ export default function InputNumber({
   const handleMouseUp = () => {
     clearInterval(refInterval.current);
   };
+
+  useEffect(() => {
+    return clearInterval(refInterval.current);
+  }, []);
 
   return (
     <StyledContainer>
