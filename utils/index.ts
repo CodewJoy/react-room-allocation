@@ -1,13 +1,17 @@
-export const getDefaultRoomAllocation = ({ guest, rooms }) => {
+import type { Room, Guest, Allocation } from '../types';
+
+export const getDefaultRoomAllocation = ({ guest, rooms }: { guest: Guest; rooms: Room[] }): {
+  defaultRooms: Allocation; totalPrice: number; 
+} => {
   const { adult: totalAdults, child: totalChildren } = guest;
   const n = rooms.length;
 
   // dp[a][c][i] represents the minimum cost to allocate 'a' adults and 'c' children to the first 'i' rooms
   const dp = Array(totalAdults + 1)
-    .fill()
+    .fill(null)
     .map(() =>
       Array(totalChildren + 1)
-        .fill()
+        .fill(null)
         .map(() => Array(n + 1).fill(Infinity))
     );
 
@@ -88,24 +92,4 @@ export const getDefaultRoomAllocation = ({ guest, rooms }) => {
   }
 
   return { defaultRooms: result.reverse(), totalPrice };
-};
-
-export const cloneDeep = (value) => {
-  if (value === null || typeof value !== "object") {
-    return value; // Return the value if it's not an object or is null
-  }
-
-  if (Array.isArray(value)) {
-    // Handle arrays
-    return value.map((item) => cloneDeep(item));
-  }
-
-  // Handle objects
-  const result = {};
-  for (const key in value) {
-    if (value.hasOwnProperty(key)) {
-      result[key] = cloneDeep(value[key]);
-    }
-  }
-  return result;
 };

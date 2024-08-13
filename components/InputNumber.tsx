@@ -52,60 +52,69 @@ const StyledButton = styled.button`
   `}
 `;
 
+type Props = {
+  min: number;
+  max: number;
+  value: number;
+  step?: number;
+  disabled?: boolean;
+  onChange: (value: number) => void;
+  onBlur?: (value: number) => void;
+};
+
 export default function InputNumber({
   min,
   max,
   step = 1,
-  name,
   value,
   disabled,
   onChange,
   onBlur,
-}) {
-  const refInterval = useRef(null);
+}: Props) {
+  // const refInterval = useRef<NodeJS.Timeout | null>(null);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(e.target.value);
     if (!isNaN(newValue) && newValue >= min && newValue <= max) {
-      onChange({ target: { name, value: newValue } });
+      onChange(newValue);
     }
   };
 
-  const handleBlur = (e) => {
-    if (onBlur) onBlur({ target: { name, value: value } });
+  const handleBlur = (ee: React.FocusEvent<HTMLInputElement>) => {
+    if (onBlur) onBlur(value);
   };
 
   const handleIncrement = () => {
     if (disabled || value >= max) return;
     const newValue = Math.min(value + step, max);
-    onChange({ target: { name, value: newValue } });
+    onChange(newValue);
   };
 
   const handleDecrement = () => {
     if (disabled || value <= min) return;
     const newValue = Math.max(value - step, min);
-    onChange({ target: { name, value: newValue } });
+    onChange(newValue);
   };
 
-  const handleMouseDown = (action) => {
+  const handleMouseDown = (action: () => void) => {
     action();
-    refInterval.current = setInterval(action, 200);
+    // refInterval.current = setInterval(action, 200);
   };
 
-  const handleMouseUp = () => {
-    clearInterval(refInterval.current);
-  };
+  // const handleMouseUp = () => {
+  //   clearInterval(refInterval.current);
+  // };
 
-  useEffect(() => {
-    return clearInterval(refInterval.current);
-  }, []);
+  // useEffect(() => {
+  //   return clearInterval(refInterval.current);
+  // }, []);
 
   return (
     <StyledContainer>
       <StyledButton
         onMouseDown={() => handleMouseDown(handleDecrement)}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        // onMouseUp={handleMouseUp}
+        // onMouseLeave={handleMouseUp}
         disabled={disabled || value <= min}
       >
         -
@@ -115,7 +124,6 @@ export default function InputNumber({
         min={min}
         max={max}
         step={step}
-        name={name}
         value={value}
         onChange={handleChange}
         onBlur={handleBlur}
@@ -123,8 +131,8 @@ export default function InputNumber({
       />
       <StyledButton
         onMouseDown={() => handleMouseDown(handleIncrement)}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        // onMouseUp={handleMouseUp}
+        // onMouseLeave={handleMouseUp}
         disabled={disabled || value >= max}
       >
         +

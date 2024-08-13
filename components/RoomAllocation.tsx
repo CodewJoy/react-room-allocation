@@ -1,8 +1,8 @@
 import styled from "@emotion/styled";
 import React, { useState, useEffect } from "react";
-import { cloneDeep } from "../utils";
 import { getDefaultRoomAllocation } from "../utils";
 import InputNumber from "./InputNumber";
+import type { Guest, Room, Allocation } from "../types";
 
 const StyledContainer = styled.div`
   width: 350px;
@@ -63,10 +63,16 @@ const StyledTotoalPrice = styled.div`
   justify-content: flex-end;
 `;
 
-export default function RoomAllocation({ guest, rooms }) {
-  const [stateAllocations, setAllocations] = useState(
+type Props = {
+  guest: Guest;
+  rooms: Room[];
+};
+
+export default function RoomAllocation({ guest, rooms }: Props) {
+  const [stateAllocations, setAllocations] = useState<Allocation>(
     () => getDefaultRoomAllocation({ guest, rooms }).defaultRooms
   );
+
   const totalPrice = stateAllocations.reduce((acc, cur) => acc + cur.price, 0);
   const assignedAdult = stateAllocations.reduce(
     (acc, cur) => acc + cur.adult,
@@ -87,24 +93,30 @@ export default function RoomAllocation({ guest, rooms }) {
     setAllocations(defaultRooms);
   }, [JSON.stringify(guest), JSON.stringify(rooms)]);
 
-  const handleAllocationChange = (index, type, value) => {
-    const newAllocations = cloneDeep(stateAllocations);
-    newAllocations[index][type] = value;
-    const assignedAdult = newAllocations.reduce(
-      (acc, cur) => acc + cur.adult,
-      0
-    );
-    const assignedChild = newAllocations.reduce(
-      (acc, cur) => acc + cur.child,
-      0
-    );
-
-    if (assignedAdult > guest.adult || assignedChild > guest.child) return;
-    newAllocations[index].price =
-      rooms[index].roomPrice +
-      newAllocations[index].adult * rooms[index].adultPrice +
-      newAllocations[index].child * rooms[index].childPrice;
-    setAllocations(newAllocations);
+  const handleAllocationChange = ({ value, index, type }: {value: number; index: number, type: 'adult'| 'child'}) => {
+    setAllocations((prev) => {
+      const newAllocations = prev.map((allocation, idx) => idx === index ? {
+        ...allocation,
+        [type]: value,
+      } : allocation);
+      const assignedAdult = newAllocations.reduce(
+        (acc, cur) => acc + cur.adult,
+        0
+      );
+      const assignedChild = newAllocations.reduce(
+        (acc, cur) => acc + cur.child,
+        0
+      );
+  
+      if (assignedAdult > guest.adult || assignedChild > guest.child) return prev;
+  
+      newAllocations[index].price =
+        rooms[index].roomPrice +
+        newAllocations[index].adult * rooms[index].adultPrice +
+        newAllocations[index].child * rooms[index].childPrice;
+      newAllocations
+      return newAllocations;
+    });
   };
 
   return (
@@ -131,8 +143,8 @@ export default function RoomAllocation({ guest, rooms }) {
                   // NOTICE: 有 child 的 room 至少要有一個 adult 分配在同一間 room
                   min={el.adult && el.child ? 1 : 0}
                   max={rooms[index] ? rooms[index].capacity - el.child : 0}
-                  onChange={(e) => {
-                    handleAllocationChange(index, "adult", e.target.value);
+                  onChange={(value) => {
+                    handleAllocationChange({ value, index, type: "adult"});
                   }}
                 />
               </StyledSelection>
@@ -148,8 +160,8 @@ export default function RoomAllocation({ guest, rooms }) {
                       ? rooms[index].capacity - el.adult
                       : 0
                   }
-                  onChange={(e) => {
-                    handleAllocationChange(index, "child", e.target.value);
+                  onChange={(value) => {
+                    handleAllocationChange({ value, index, type: "child" });
                   }}
                 />
               </StyledSelection>
